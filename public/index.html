@@ -11,6 +11,34 @@
     <noscript>
       <strong>We're sorry but signpython doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
     </noscript>
+    <script>
+        document.addEventListener('EUSignCPModuleLoaded', function (e) {
+        console.log('EUSignCPModuleLoaded')
+      }, false);
+
+      window.isEUSignCPModuleLoaded = false;
+      // noinspection JSUnusedLocalSymbols
+      function EUSignCPModuleLoaded(){
+        /* Після завантаження модуля бібліотеки буде автоматично викликана функція сповіщення про завантаження */
+        window.isEUSignCPModuleLoaded = true;
+        // alert('loaded');
+        var eventEUSignCPModuleLoaded = new Event('EUSignCPModuleLoaded');
+        document.dispatchEvent(eventEUSignCPModuleLoaded);
+      }
+
+      window.isEUSignCPModuleInitialized = false;
+      // noinspection JSUnusedLocalSymbols
+      function EUSignCPModuleInitialized(isInitialized) {
+        /* Функція викликається після завантаження бібліотеки */
+        /* Функції бібліотеки можна викликати тільки після виклику EUSignCPModuleInitialized */
+        window.isEUSignCPModuleInitialized = isInitialized;
+        var eventEUSignCPModuleInitialized = new CustomEvent('EUSignCPModuleInitialized', { 'detail': isInitialized });
+        document.dispatchEvent(eventEUSignCPModuleInitialized);
+      }
+    </script>
+    <script type="text/JavaScript" src="lib/euscpt.js"></script>
+    <script type="text/JavaScript" src="lib/euscpm.js"></script>
+    <script async type="text/javascript" src="lib/euscp.js"></script>
     <div id="app"></div>
     <!-- built files will be auto injected -->
   </body>
