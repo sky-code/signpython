@@ -13,6 +13,12 @@
             <label>
                 CA certificates file url <input type="text" v-model="certificatesFileUrl">
             </label>
+            <label>
+                CAs file url <input type="text" v-model="casFileUrl">
+            </label>
+            <label>
+                CA Common Name <input type="text" v-model="caCommonName">
+            </label>
         </div>
         <hr/>
         <button type="button" @click="addKeyFile">Add key</button>
@@ -50,7 +56,9 @@
                 isEUSignCPModuleLoaded: false,
                 isEUSignCPModuleInitialized: false,
                 keyFiles: [],
-                certificatesFileUrl: '/data/CACertificates.p7b'
+                certificatesFileUrl: '/data/CACertificates.p7b',
+                casFileUrl: '/data/CAs.json',
+                caCommonName: 'АЦСК АТ КБ «ПРИВАТБАНК»',
             }
         },
         methods: {
@@ -74,7 +82,6 @@
             readInfo(keyFile) {
                 const fileReader = new FileReader()
                 fileReader.onload = function (event) {
-                    console.log('readed')
                     const arrayBuffer = event.target.result
                     const pKeyData = new Uint8Array(arrayBuffer)
                     try {
@@ -84,15 +91,26 @@
                             errorMessage: e.message
                         }
                     }
+
+                    try {
+                        var data = new Uint8Array(10);
+                        var signature = keyFile.signer.euSign.SignData(data, true);
+
+                        console.log("Signature: " + signature);
+                    } catch (e) {
+                        console.log("Error: " + e);
+                    }
                 }
                 fileReader.readAsArrayBuffer(keyFile.file)
             },
             async setSettings(keyFile) {
-                const response = await axios.get(this.certificatesFileUrl, {
+                const certificatesFileResponse = await axios.get(this.certificatesFileUrl, {
                     responseType: 'arraybuffer'
                 })
-                const certificatesData = new Uint8Array(response.data)
-                keyFile.signer.initSettings(certificatesData)
+                const certificatesData = new Uint8Array(certificatesFileResponse.data)
+
+                const casFileUrlResponse = await axios.get(this.casFileUrl)
+                keyFile.signer.initSettings(certificatesData, casFileUrlResponse.data, this.caCommonName)
                 alert('ok')
             }
         },

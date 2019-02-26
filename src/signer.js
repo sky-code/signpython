@@ -99,19 +99,17 @@ export default class Signer {
         this.euSign.SetLDAPSettings(settings);
     }
 
-    initSettings(certificatesData) {
+    initSettings(certificatesData, CAs, CACommonName) {
+        this.init()
         if (this.euSign.DoesNeedSetSettings()) {
             this.euSign.SetXMLHTTPProxyService('/proxy')
             /* Зчитування файлу з налаштуваннями АЦСК */
-            // var CAs = require('./data/CAs.Test') //JSON.parse(fs.readFileSync(g_CAs), 'utf8');
-            let CAs = []
-            const g_PKey = {}
 
             /* Отримання налаштувань АЦСК для ос. ключа */
             let CASettings = null;
             for (var i = 0; i < CAs.length; i++) {
                 for (var j = 0; j < CAs[i].issuerCNs.length; j++) {
-                    if (g_PKey.CACommonName == CAs[i].issuerCNs[j]) {
+                    if (CACommonName == CAs[i].issuerCNs[j]) {
                         CASettings = CAs[i];
                         break;
                     }
@@ -120,20 +118,6 @@ export default class Signer {
                 if (CASettings)
                     break;
             }
-
-            CAs = [{
-                "issuerCNs": ["АЦСК АТ КБ «ПРИВАТБАНК»",
-                    "АЦСК ПАТ КБ «ПРИВАТБАНК»",
-                    "АЦСК «ПРИВАТБАНК»"],
-                "address": "acsk.privatbank.ua",
-                "ocspAccessPointAddress": "acsk.privatbank.ua/services/ocsp/",
-                "ocspAccessPointPort": "80",
-                "cmpAddress": "acsk.privatbank.ua",
-                "tspAddress": "acsk.privatbank.ua",
-                "tspAddressPort": "80",
-                "directAccess": true
-            }]
-            CASettings = CAs[0]
 
             /* Встановлення параметрів за замовчанням */
             this.setSettings(CAs, CASettings);
@@ -150,7 +134,6 @@ export default class Signer {
             /* Ініціалізація криптографічної бібліотеки */
             this.euSign.Initialize()
         }
-        this.initSettings()
     }
 
     readPrivateKeyInfo(pKeyData, password) {
