@@ -99,6 +99,10 @@ export default class Signer {
         this.euSign.SetLDAPSettings(settings);
     }
 
+    get doesNeedSetSettings() {
+        return this.euSign.DoesNeedSetSettings()
+    }
+
     initSettings(certificatesData, CAs, CACommonName) {
         this.init()
         if (this.euSign.DoesNeedSetSettings()) {

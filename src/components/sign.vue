@@ -24,15 +24,18 @@
         <button type="button" @click="addKeyFile">Add key</button>
         <div>
             <div v-for="(item, index) in keyFiles" :key="index">
-                <button type="button" @click="setSettings(item)">Set settings</button>
-
+                <div>
+                    <span v-if="item.doesNeedSetSettings">need set settings</span>
+                    <span v-else>settings already set</span>
+                    <button type="button" @click="setSettings(item)">Set settings</button>
+                </div>
                 <label>
                     Select key file <input type="file" @change="updateKeyFile(item, $event)">
                 </label>
+                <label>
+                    Password <input type="password" v-model="item.password">
+                </label>
                 <div v-if="item.file">
-                    <label>
-                        Password <input type="password" v-model="item.password">
-                    </label>
                     <button type="button" @click="readInfo(item)">read info</button>
                     <div v-if="item.info">
                         <div v-if="item.info.errorMessage">
@@ -74,11 +77,13 @@
                 this.isEUSignCPModuleInitialized = true
             },
             addKeyFile() {
+                const signer = new Signer()
                 this.keyFiles.push({
                     file: null,
                     password: null,
                     info: null,
-                    signer: new Signer()
+                    signer: signer,
+                    doesNeedSetSettings: signer.doesNeedSetSettings
                 })
             },
             updateKeyFile(keyFile, event) {
@@ -115,10 +120,12 @@
 
                 const casFileUrlResponse = await axios.get(this.casFileUrl)
                 keyFile.signer.initSettings(certificatesData, casFileUrlResponse.data, this.caCommonName)
-                alert('ok')
+                keyFile.doesNeedSetSettings = keyFile.signer.doesNeedSetSettings
             }
         },
         created() {
+            this.addKeyFile()
+
             this.isEUSignCPModuleLoaded = Signer.isEUSignCPModuleLoaded()
             if (!this.isEUSignCPModuleLoaded) {
                 document.addEventListener('EUSignCPModuleLoaded', this.EUSignCPModuleLoadedHandler, false)
