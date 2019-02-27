@@ -43,6 +43,11 @@
                 </label>
                 <div v-if="item.file">
                     <button type="button" @click="readInfo(item)">read info</button>
+                    <div>
+                        <label>file for sign/verify <input type="file" @change="updateSignFile(item, $event)"></label>
+                        <label>signature <textarea v-model="item.signature"></textarea></label>
+                        <button @click="signFile(item)">sign file</button>
+                    </div>
                     <div v-if="item.info">
                         <div v-if="item.info.errorMessage">
                             {{item.info.errorMessage}}
@@ -87,6 +92,8 @@
                 this.keyFiles.push({
                     file: null,
                     password: null,
+                    signFile: null,
+                    signature: '',
                     info: null,
                     signer: signer,
                     doesNeedSetSettings: signer.doesNeedSetSettings,
@@ -95,6 +102,9 @@
             },
             updateKeyFile(keyFile, event) {
                 keyFile.file = event.target.files[0]
+            },
+            updateSignFile(keyFile, event) {
+                keyFile.signFile = event.target.files[0]
             },
             readInfo(keyFile) {
                 const fileReader = new FileReader()
@@ -120,6 +130,15 @@
                     }
                 }
                 fileReader.readAsArrayBuffer(keyFile.file)
+            },
+            signFile(item) {
+                const fileReader = new FileReader()
+                fileReader.onload = function (event) {
+                    const arrayBuffer = event.target.result
+                    const fileData = new Uint8Array(arrayBuffer)
+                    item.signature = item.signer.euSign.SignData(fileData, true)
+                }
+                fileReader.readAsArrayBuffer(item.signFile)
             },
             async setSettings(keyFile) {
                 const certificatesFileResponse = await axios.get(this.certificatesFileUrl, {
