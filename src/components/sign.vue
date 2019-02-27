@@ -47,6 +47,10 @@
                         <label>file for sign/verify <input type="file" @change="updateSignFile(item, $event)"></label>
                         <label>signature <textarea v-model="item.signature"></textarea></label>
                         <button @click="signFile(item)">sign file</button>
+                        <button @click="verifySign(item)">verify sign</button>
+                        <div v-if="item.verifyInfo">
+                            {{JSON.stringify(item.verifyInfo, null, ' ')}}
+                        </div>
                     </div>
                     <div v-if="item.info">
                         <div v-if="item.info.errorMessage">
@@ -94,6 +98,7 @@
                     password: null,
                     signFile: null,
                     signature: '',
+                    verifyInfo: null,
                     info: null,
                     signer: signer,
                     doesNeedSetSettings: signer.doesNeedSetSettings,
@@ -137,6 +142,19 @@
                     const arrayBuffer = event.target.result
                     const fileData = new Uint8Array(arrayBuffer)
                     item.signature = item.signer.euSign.SignData(fileData, true)
+                }
+                fileReader.readAsArrayBuffer(item.signFile)
+            },
+            verifySign(item) {
+                const fileReader = new FileReader()
+                fileReader.onload = function (event) {
+                    const arrayBuffer = event.target.result
+                    const fileData = new Uint8Array(arrayBuffer)
+                    try {
+                        item.verifyInfo = item.signer.euSign.VerifyData(fileData, item.signature)
+                    } catch (e) {
+                        alert(JSON.stringify(e))
+                    }
                 }
                 fileReader.readAsArrayBuffer(item.signFile)
             },
