@@ -38,6 +38,11 @@
                         <div v-if="item.info.errorMessage">
                             {{item.info.errorMessage}}
                         </div>
+                        <div v-else>
+                            <pre>
+                                {{JSON.stringify(item.info, null, '  ')}}
+                            </pre>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -91,7 +96,6 @@
                             errorMessage: e.message
                         }
                     }
-
                     try {
                         var data = new Uint8Array(10);
                         var signature = keyFile.signer.euSign.SignData(data, true);
