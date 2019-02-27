@@ -1,3 +1,5 @@
+const PROXY_PATH = '/proxy'
+
 /* Налаштування АЦСК за замовчанням*/
 const g_CADefaultSettings = {
     "issuerCNs": ["Акредитований центр сертифікації ключів ІДД ДФС",
@@ -103,10 +105,14 @@ export default class Signer {
         return this.euSign.DoesNeedSetSettings()
     }
 
+    get isPrivateKeyReaded() {
+        return this.euSign.IsPrivateKeyReaded()
+    }
+
     initSettings(certificatesData, CAs, CACommonName) {
         this.init()
         if (this.euSign.DoesNeedSetSettings()) {
-            this.euSign.SetXMLHTTPProxyService('/proxy')
+            this.euSign.SetXMLHTTPProxyService(PROXY_PATH)
             /* Зчитування файлу з налаштуваннями АЦСК */
 
             /* Отримання налаштувань АЦСК для ос. ключа */

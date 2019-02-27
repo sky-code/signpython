@@ -21,7 +21,7 @@
             </label>
         </div>
         <hr/>
-        <button type="button" @click="addKeyFile">Add key</button>
+        <button type="button" @click="addKeyFile">Add key file</button>
         <div>
             <div v-for="(item, index) in keyFiles" :key="index">
                 <div>
@@ -29,9 +29,15 @@
                     <span v-else>settings already set</span>
                     <button type="button" @click="setSettings(item)">Set settings</button>
                 </div>
-                <label>
-                    Select key file <input type="file" @change="updateKeyFile(item, $event)">
-                </label>
+                <div>
+                    <div>
+                        <span v-if="item.isPrivateKeyReaded">private key already readed</span>
+                        <span v-else>private key not readed</span>
+                    </div>
+                    <label>
+                        Select key file <input type="file" @change="updateKeyFile(item, $event)">
+                    </label>
+                </div>
                 <label>
                     Password <input type="password" v-model="item.password">
                 </label>
@@ -83,7 +89,8 @@
                     password: null,
                     info: null,
                     signer: signer,
-                    doesNeedSetSettings: signer.doesNeedSetSettings
+                    doesNeedSetSettings: signer.doesNeedSetSettings,
+                    isPrivateKeyReaded: signer.isPrivateKeyReaded
                 })
             },
             updateKeyFile(keyFile, event) {
@@ -100,6 +107,8 @@
                         keyFile.info = {
                             errorMessage: e.message
                         }
+                    } finally {
+                        keyFile.isPrivateKeyReaded = keyFile.signer.isPrivateKeyReaded
                     }
                     try {
                         var data = new Uint8Array(10);
@@ -124,8 +133,6 @@
             }
         },
         created() {
-            this.addKeyFile()
-
             this.isEUSignCPModuleLoaded = Signer.isEUSignCPModuleLoaded()
             if (!this.isEUSignCPModuleLoaded) {
                 document.addEventListener('EUSignCPModuleLoaded', this.EUSignCPModuleLoadedHandler, false)

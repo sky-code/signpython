@@ -3,10 +3,12 @@ const bodyParser = require('body-parser')
 const httpContentTypeBase64 = 'X-user/base64-data'
 const bodyTextParser = bodyParser.text({type: '*/*', limit: '1000kb'})
 
+const PROXY_PATH = '/proxy'
+
 module.exports = {
     devServer: {
         setup: function (app) {
-            app.all('/proxy', bodyTextParser, function (req, res) {
+            app.all(PROXY_PATH, bodyTextParser, function (req, res) {
                 const address = req.query.address
                 if (!address) {
                     return res.status(400).end()
@@ -18,7 +20,7 @@ module.exports = {
                     headers: {'content-type': ''} // is this required here?
                 }
                 if (req.method === 'POST') {
-                    if(req.headers['content-type'] !== httpContentTypeBase64){
+                    if (req.headers['content-type'] !== httpContentTypeBase64) {
                         return res.status(400).end()
                     }
                     const requestBodyBase64String = req.body
